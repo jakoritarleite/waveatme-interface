@@ -8,7 +8,8 @@ const config: UserConfig = {
     alias: {
       '@app': path.resolve('./src'),
       '@stores': path.resolve('./src/stores'),
-      '@artifacts': path.resolve('./src/artifacts')
+      '@artifacts': path.resolve('./src/artifacts'),
+      '@components': path.resolve('./src/components')
     }
   }
 };

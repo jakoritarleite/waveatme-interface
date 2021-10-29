@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, beforeUpdate } from 'svelte';
   import { account } from '@stores/accounts';
-  import { ethers, ContractInterface } from 'ethers';
+  import { waves, waveCount } from '@stores/wave';
+  import type { Wave, ContractWave } from '@stores/wave';
+  import { ethers } from 'ethers';
   import contractABI from '@artifacts/WavePortal.json';
 
-  const contractAddress = '0x8187ea11cf65b9ede7d9b00cf36fcc2c52ac14a7';
-  const contractABIA = [
-    'function wave()',
-    'function getTotalWaves() view returns (uint256)'
-  ];
+  import Button from '@components/Button.svelte';
+
+  const contractAddress = '0x4a8ae3253b413505e02f33c33745958998ba14f0';
 
   const wave = async () => {
     try {
@@ -18,13 +18,27 @@
         const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
         const wavePortalContract = new ethers.Contract(
           contractAddress,
-          // contractABI as unknown as ContractInterface,
           contractABI.abi,
           signer
         );
 
-        let count = await wavePortalContract.getTotalWaves();
-        console.log('Retrieved total wave count...', count.toNumber());
+        const waveTxn = await wavePortalContract.wave('Famous');
+        console.log('mining', waveTxn.hash);
+        waveTxn.wait();
+        console.log('mined', waveTxn.hash);
+
+        const Waves: ContractWave[] = await wavePortalContract.getAllWaves();
+
+        let wavesCleaned: Wave[];
+        Waves.forEach(wave => {
+          wavesCleaned.push({
+            address: wave.waver,
+            timestamp: new Date(wave.timestamp * 1000),
+            message: wave.message
+          });
+        });
+
+        waves.set(wavesCleaned);
       } else {
         console.log("Ethereum object doesn't exist!");
       }
@@ -32,6 +46,8 @@
       console.log(err);
     }
   };
+
+  const getAllWaves = async () => {};
 
   const connectWallet = async () => {
     try {
@@ -67,9 +83,36 @@
       const accounts = await ethereum.request({ method: 'eth_accounts' });
 
       if (accounts.length !== 0) {
-        const account = accounts[0];
-        console.log('Found an authorized account:', account);
-        account.set(account);
+        const ethAccount = accounts[0];
+        console.log('Found an authorized account:', ethAccount);
+        account.set(ethAccount);
+
+        const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI.abi,
+          signer
+        );
+
+        // let count = await wavePortalContract.getTotalWaves();
+        // console.log('Retrieved total wave count...', count.toNumber());
+        // waveCount.set(count.toNumber());
+
+        const Waves: ContractWave[] = await wavePortalContract.getAllWaves();
+        console.log('WAVES', Waves);
+
+        let wavesCleaned: Wave[] = [];
+        Waves.forEach(wave => {
+          wavesCleaned.push({
+            address: wave.waver,
+            timestamp: new Date(wave.timestamp * 1000),
+            message: wave.message
+          });
+        });
+        console.log('cleaned waves', wavesCleaned);
+        console.log('cleaned waves', $waves);
+        waves.set(wavesCleaned);
+        console.log('cleaned', $waves);
       } else {
         console.log('No authorized account found');
       }
@@ -77,23 +120,92 @@
       console.log(err);
     }
   });
+
+  // beforeUpdate(async () => {
+  //   try {
+  //     const { ethereum } = window;
+
+  //     if (!ethereum) {
+  //       console.log('Make sure you have metamask');
+  //       return;
+  //     } else {
+  //       console.log('We have the ethereum object', ethereum);
+  //     }
+
+  //     const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
+  //     const wavePortalContract = new ethers.Contract(
+  //       contractAddress,
+  //       contractABI.abi,
+  //       signer
+  //     );
+
+  //     // let count = await wavePortalContract.getTotalWaves();
+  //     // console.log('Retrieved total wave count...', count.toNumber());
+  //     // waveCount.set(count.toNumber());
+
+  //     const Waves: Wave[] = await wavePortalContract.getAllWaves();
+
+  //     let wavesCleaned = [];
+  //     Waves.forEach(wave => {
+  //       wavesCleaned.push({
+  //         waver: wave.waver,
+  //         timestamp: new Date(wave.timestamp * 1000),
+  //         message: wave.message
+  //       });
+  //     });
+  //     console.log('cleaned waves', wavesCleaned);
+
+  //     waves.set(wavesCleaned);
+  //     console.log('cleaned', $waves);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // });
+
+  $: account;
+  $: waveCount;
+  $: waves;
 </script>
 
 <main>
   <div class="mainContainer">
-    <div class="dataContainer">
-      <div class="header">👋 Hey there!</div>
-
-      <div class="bio">
-        I am farza and I worked on self-driving cars so that's pretty cool
-        right? Connect your Ethereum wallet and wave at me!
+    <div>
+      <div class="header">Wave at me 👋</div>
+      <div class="bio">Send me a wave on the public Ethereum blockchain.</div>
+    </div>
+    <div class="waveCount">
+      Current wave count
+      <span>
+        {#if !$waveCount}
+          🧐
+        {:else}
+          {$waveCount}
+        {/if}
+      </span>
+    </div>
+    {#if $waves}
+      <div>
+        {#each $waves as wave}
+          <div>
+            <div>Address: {wave.address}</div>
+            <div>Time: {wave.timestamp.toString()}</div>
+            <div>Message: {wave.message}</div>
+          </div>
+        {/each}
       </div>
-
-      <button class="waveButton" on:click={wave}> Wave at Me </button>
+    {/if}
+    <div class="ctas">
       {#if !$account}
-        <button class="waveButton" on:click={connectWallet}>
-          Connect Wallet
-        </button>
+        <Button on:click={connectWallet}>Connect Wallet</Button>
+      {:else}
+        <a
+          href="https://ethereum.stackexchange.com/questions/86901/how-can-i-disconnect-a-metamask-wallet-from-uniswap#:~:text=You%20can%20disconnect%20a%20Metamask,with%20the%20trash%20can%20icon."
+          target="_blank"
+          class="secondary"
+        >
+          Disconnect
+        </a>
+        <Button on:click={wave}>Wave at Me</Button>
       {/if}
     </div>
   </div>
@@ -106,42 +218,68 @@
   }
 
   main {
-    text-align: center;
-    padding: 1em;
-    margin: 0 auto;
+    height: 100vh;
+
+    display: flex;
   }
 
   .mainContainer {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 64px;
-  }
+    color: #fff;
 
-  .dataContainer {
+    text-align: center;
+
+    height: 60%;
+
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    max-width: 600px;
+    justify-content: space-between;
+
+    margin-top: auto;
+    margin-left: auto;
+    margin-bottom: auto;
+    margin-right: auto;
   }
 
   .header {
     text-align: center;
-    font-size: 32px;
-    font-weight: 600;
+    font-weight: bold;
+    font-size: 64px;
+    line-height: 77px;
   }
 
   .bio {
+    color: #eaeaea;
+    opacity: 0.8;
+
+    margin-top: 30px;
+
+    font-size: 23px;
+    line-height: 34px;
     text-align: center;
-    color: gray;
-    margin-top: 16px;
   }
 
-  .waveButton {
-    cursor: pointer;
-    margin-top: 16px;
-    padding: 8px;
-    border: 0;
-    border-radius: 5px;
+  .waveCount {
+    font-size: 22px;
+    font-weight: 600;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .waveCount span {
+    font-size: 24px;
+    margin-top: 25px;
+    padding: 32px;
+    border-radius: 10px;
+    width: fit-content;
+    background-color: #272a31;
+  }
+
+  .ctas {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
   }
 </style>
