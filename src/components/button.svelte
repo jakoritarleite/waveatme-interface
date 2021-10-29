@@ -25,18 +25,22 @@
     align-items: center;
     transition: opacity 0.2s ease;
   }
+
   button:hover {
     opacity: 0.4;
   }
+
   .primary {
-    background: #007aff;
+    background: #c8a3ff;
     color: white;
     padding: 10px 25px;
     border-radius: 10px;
   }
+
   .secondary {
     color: white;
   }
+
   .simple {
     background: transparent;
     color: #007aff;
