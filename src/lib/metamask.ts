@@ -28,7 +28,7 @@ export const connect = async () => {
       console.log('Did not found any valid account!');
     }
   } catch (err) {
-    console.log('dota', err);
+    console.log('Error when connecting wallet', err);
   }
 };
 
@@ -60,7 +60,38 @@ export const getAllWaves = async () => {
     });
     _waves.set(cleansedWaves);
   } catch (err) {
-    console.log(err.message);
+    console.log('Error when getting waves', err.message);
+    if (err.message.includes('unknown account #0')) {
+      walletAccount.set([]);
+      isConnected.set(false);
+    }
+  }
+};
+
+export const sendWave = async (message: string) => {
+  try {
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      console.log(
+        "WARN the ethereum object isn't accessible. Please install the metamask extension!"
+      );
+      throw new Error('Ethereum object unaccessible');
+    }
+
+    const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
+    const wavePortalContract = new ethers.Contract(
+      get(contractAddress),
+      get(contractABI),
+      signer
+    );
+
+    const waveTxn = await wavePortalContract.wave(message);
+    console.log('mining transation for message creation', waveTxn.hash);
+    waveTxn.wait();
+    console.log('mined transation for message creation', waveTxn.hash);
+  } catch (err) {
+    console.log('Error when sending wave', err.message);
     if (err.message.includes('unknown account #0')) {
       walletAccount.set([]);
       isConnected.set(false);
