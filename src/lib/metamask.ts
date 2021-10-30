@@ -32,6 +32,65 @@ export const connect = async () => {
   }
 };
 
+export const checkWallet = async () => {
+  try {
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      console.log(
+        "WARN the ethereum object isn't accessible. Please install the metamask extension!"
+      );
+      throw new Error('Ethereum object unaccessible');
+    }
+
+    const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+    if (accounts.length !== 0) {
+      walletAccount.set(accounts[0]);
+      isConnected.set(true);
+    } else {
+      walletAccount.set([]);
+      isConnected.set(false);
+    }
+  } catch (err) {
+    console.log('Error when connecting wallet', err);
+  }
+};
+
+export const listenNewWave = async () => {
+  try {
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      console.log(
+        "WARN the ethereum object isn't accessible. Please install the metamask extension!"
+      );
+      throw new Error('Ethereum object unaccessible');
+    }
+
+    const signer = new ethers.providers.Web3Provider(ethereum).getSigner();
+    const wavePortalContract = new ethers.Contract(
+      get(contractAddress),
+      get(contractABI),
+      signer
+    );
+
+    wavePortalContract.on('NewWave', (from, timestamp, message) => {
+      console.log('New message event triggered!');
+      _waves.set([
+        {
+          address: from,
+          timestamp: new Date(timestamp * 1000),
+          message: message
+        },
+        ...get(_waves)
+      ]);
+    });
+  } catch (err) {
+    console.log('Error when connecting wallet', err);
+  }
+};
+
 export const getAllWaves = async () => {
   try {
     const { ethereum } = window;
