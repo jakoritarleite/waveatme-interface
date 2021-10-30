@@ -86,7 +86,9 @@ export const sendWave = async (message: string) => {
       signer
     );
 
-    const waveTxn = await wavePortalContract.wave(message);
+    const waveTxn = await wavePortalContract.wave(message, {
+      gasLimit: 300000
+    });
     console.log('mining transation for message creation', waveTxn.hash);
     waveTxn.wait();
     console.log('mined transation for message creation', waveTxn.hash);
