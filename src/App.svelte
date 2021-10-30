@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { isConnected } from '@stores/wallet';
+  import * as metamask from '@app/lib/metamask';
   import Button from '@components/Button.svelte';
   import ConnectWalletModal from '@components/ConnectWalletModal.svelte';
   import Messages from '@components/Messages.svelte';
@@ -7,15 +9,27 @@
 
   let showConnectWalletModal: boolean = false;
 
+  onMount(async () => {
+    try {
+      await metamask.checkWallet();
+      await metamask.listenNewWave();
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
   $: isConnected;
 </script>
 
 <main>
   <header>
     <h1>Wave at me</h1>
-    <Button on:click={() => (showConnectWalletModal = !showConnectWalletModal)}
-      >Connect</Button
-    >
+    {#if !$isConnected}
+      <Button
+        on:click={() => (showConnectWalletModal = !showConnectWalletModal)}
+        >Connect</Button
+      >
+    {/if}
   </header>
   <h1 class="description">Send me messages through the blockchain network</h1>
   <Textarea />
