@@ -3,6 +3,7 @@
   import Button from '@components/Button.svelte';
   import ConnectWalletModal from '@components/ConnectWalletModal.svelte';
   import Messages from '@components/Messages.svelte';
+  import Textarea from '@components/Textarea.svelte';
 
   let showConnectWalletModal: boolean = false;
 
@@ -17,6 +18,7 @@
     >
   </header>
   <h1 class="description">Send me messages through the blockchain network</h1>
+  <Textarea />
   <Messages bind:showDemo={$isConnected} />
   <ConnectWalletModal bind:show={showConnectWalletModal} />
 </main>
