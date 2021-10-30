@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { isConnected } from '@stores/wallet';
   import Button from '@components/Button.svelte';
   import ConnectWalletModal from '@components/ConnectWalletModal.svelte';
+  import Messages from '@components/Messages.svelte';
 
   let showConnectWalletModal: boolean = false;
+
+  $: isConnected;
 </script>
 
 <main>
@@ -13,6 +17,7 @@
     >
   </header>
   <h1 class="description">Send me messages through the blockchain network</h1>
+  <Messages bind:showDemo={$isConnected} />
   <ConnectWalletModal bind:show={showConnectWalletModal} />
 </main>
 
