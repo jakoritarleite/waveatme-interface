@@ -31,8 +31,8 @@
   }
 
   .primary {
-    background: #c8a3ff;
-    color: white;
+    background: #f6f1eb;
+    color: #00251b;
     padding: 10px 25px;
     border-radius: 10px;
   }

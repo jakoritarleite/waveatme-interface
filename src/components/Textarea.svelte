@@ -41,7 +41,7 @@
   }
 
   textarea {
-    background-color: #f2e8e1;
+    background-color: #fffcf5;
 
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
@@ -53,37 +53,39 @@
     resize: none;
     border: none;
     outline: none;
-    border-radius: 10px;
+    border-radius: 50px;
 
     margin-top: 15px;
 
     box-sizing: border-box;
     padding: 25px;
+
+    transition: border-radius cubic-bezier(0.4, 0, 0.2, 1) 250ms;
+  }
+
+  textarea:hover {
+    border-radius: 30px;
   }
 
   button {
     position: absolute;
 
-    background-color: #c4c4c4;
+    background-color: #b7f1db;
 
-    height: 40px;
-    width: 40px;
+    height: 60px;
+    width: 60px;
 
     border: none;
     outline: none;
-    border-radius: 10px;
+    border-radius: 20px;
 
     right: 23px;
     bottom: 25px;
 
-    transition: all 0.2s ease;
+    transition: border-radius cubic-bezier(0.4, 0, 0.2, 1) 250ms;
   }
 
   button:hover {
-    height: 45px;
-    width: 45px;
-
-    right: 20px;
-    bottom: 22px;
+    border-radius: 14px;
   }
 </style>

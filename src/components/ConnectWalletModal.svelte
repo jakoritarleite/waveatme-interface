@@ -58,7 +58,7 @@
     top: 0;
     left: 0;
 
-    background-color: #fafafa;
+    background-color: #fffcf5;
 
     padding: 50px;
     box-sizing: border-box;
@@ -86,7 +86,7 @@
   }
 
   .wallet-button {
-    background-color: #f2e8e1;
+    background-color: #ede9d7;
 
     font-size: 15px;
     font-weight: bold;

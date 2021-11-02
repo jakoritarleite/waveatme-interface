@@ -42,7 +42,6 @@
     font-family: 'Poppins', sans-serif;
 
     max-width: 30ch;
-    height: 100vh;
     margin-inline: auto;
   }
 
